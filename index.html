@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios Funerarios y Registro de Mortalidad</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --card-border: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-gold: #c5a059;
+            --accent-gold-hover: #e5be75;
+            --danger: #991b1b;
+            --radius: 8px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, Georgia, serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 15px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 28px;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
+        }
+
+        .header-icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--card-bg);
+            padding: 12px 0 16px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background-color: #222222;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-gold);
+            transition: width 0.3s ease;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background-color: #0a0a0a;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s ease;
+        }
+
+        .question-card.error {
+            border-color: #dc2626;
+            background-color: rgba(220, 38, 38, 0.05);
+        }
+
+        .question-title {
+            font-size: 1.05rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .question-num {
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-width: 24px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: #141414;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .select-wrapper::after {
+            content: '▾';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .question-card.error .error-msg {
+            display: block;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background-color: #1a1a1a;
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-gold);
+            color: #000000;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        /* Loader */
+        .loader-container {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #222222;
+            border-left-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-container h3 {
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Result Section */
+        #result-section {
+            display: none;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-card {
+            background: #0a0a0a;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .result-title {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .result-age {
+            font-size: 3.2rem;
+            font-weight: 400;
+            color: var(--accent-gold);
+            margin-bottom: 24px;
+            line-height: 1.1;
+            letter-spacing: 1px;
+        }
+
+        .cause-title {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 24px;
+            margin-bottom: 14px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .story-box {
+            background: #141414;
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 4px;
+            padding: 18px;
+            text-align: left;
+            margin-bottom: 24px;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+
+        .story-box p {
+            margin-bottom: 8px;
+        }
+        .story-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .story-emoji {
+            font-size: 3rem;
+            margin: 10px 0;
+            display: block;
+            filter: grayscale(0.2);
+        }
+
+        /* Tombstone Secret Button */
+        .tombstone-btn {
+            background: #141414;
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px auto;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tombstone-btn:hover {
+            border-color: var(--accent-gold);
+            background: #1f1f1f;
+        }
+
+        /* Breakdown Accordion */
+        .breakdown-details {
+            background: #0a0a0a;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        summary {
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            user-select: none;
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
+            text-transform: uppercase;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '▾';
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .breakdown-content {
+            padding: 0 18px 18px 18px;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.9rem;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            color: var(--text-secondary);
+            padding-right: 12px;
+        }
+
+        .breakdown-val {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .breakdown-val.plus { color: #10b981; }
+        .breakdown-val.minus { color: #ef4444; }
+
+        .breakdown-total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--accent-gold);
+        }
+
+        /* Canvas Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <span class="header-icon">⚱️</span>
+            <h1>Cuestionario de Longevidad</h1>
+            <p>Registro Oficial de Estimación de Mortalidad e Incidencias Vitales</p>
+        </header>
+
+        <!-- QUIZ SECTION -->
+        <div id="quiz-section">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span>Evaluación de datos</span>
+                    <span id="progress-text">0 / 14 completadas</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
+            </div>
+
+            <form id="quiz-form">
+                <!-- Q1 -->
+                <div class="question-card" id="card-q1">
+                    <div class="question-title">
+                        <span class="question-num">01.</span>
+                        <label for="q1">¿Cuántos años tienes?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q1" name="q1" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona tu edad actual...</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question-card" id="card-q2">
+                    <div class="question-title">
+                        <span class="question-num">02.</span>
+                        <label for="q2">¿Cuál es tu sexo?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q2" name="q2" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="hombre">Hombre</option>
+                            <option value="mujer">Mujer</option>
+                            <option value="prefiero_no">Prefiero no contestar</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question-card" id="card-q3">
+                    <div class="question-title">
+                        <span class="question-num">03.</span>
+                        <label for="q3">¿Fumas?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q3" name="q3" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question-card" id="card-q4">
+                    <div class="question-title">
+                        <span class="question-num">04.</span>
+                        <label for="q4">¿Haces ejercicio?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q4" name="q4" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question-card" id="card-q5">
+                    <div class="question-title">
+                        <span class="question-num">05.</span>
+                        <label for="q5">¿Practicas deportes de riesgo?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q5" name="q5" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question-card" id="card-q6">
+                    <div class="question-title">
+                        <span class="question-num">06.</span>
+                        <label for="q6">¿Con qué frecuencia bebes alcohol?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q6" name="q6" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="varias_semana">Varias veces a la semana</option>
+                            <option value="una_semana">Una vez a la semana</option>
+                            <option value="par_mes">Un par de veces al mes</option>
+                            <option value="menos_nada">Menos o nada</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="question-card" id="card-q7">
+                    <div class="question-title">
+                        <span class="question-num">07.</span>
+                        <label for="q7">¿Cómo es tu alimentación?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q7" name="q7" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="evito_azucares">Evito azúcares y grasas</option>
+                            <option value="variada">Dieta variada generalmente saludable</option>
+                            <option value="como_gana">Como lo que me da la gana</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="question-card" id="card-q8">
+                    <div class="question-title">
+                        <span class="question-num">08.</span>
+                        <label for="q8">¿Cómo describirías tu nivel de estrés?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q8" name="q8" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="alto">Alto</option>
+                            <option value="normal">Normal</option>
+                            <option value="ninguno">Ninguno</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="question-card" id="card-q9">
+                    <div class="question-title">
+                        <span class="question-num">09.</span>
+                        <label for="q9">¿Consumes drogas?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q9" name="q9" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="no_gracias">No, gracias</option>
+                            <option value="si_favor">Sí, por favor</option>
+                            <option value="prefiero_no">Prefiero no contestar</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="question-card" id="card-q10">
+                    <div class="question-title">
+                        <span class="question-num">10.</span>
+                        <label for="q10">¿Duermes 8 horas al día?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q10" name="q10" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="si">Sí</option>
+                            <option value="menos">Menos</option>
+                            <option value="mas">Más</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q11 -->
+                <div class="question-card" id="card-q11">
+                    <div class="question-title">
+                        <span class="question-num">11.</span>
+                        <label for="q11">¿Eres una persona torpe que se tropieza o se cae con frecuencia?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q11" name="q11" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q12 -->
+                <div class="question-card" id="card-q12">
+                    <div class="question-title">
+                        <span class="question-num">12.</span>
+                        <label for="q12">¿Qué haces cuando un alimento está caducado?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q12" name="q12" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="ley">La fecha de caducidad es ley</option>
+                            <option value="orientativa">La fecha es orientativa</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q13 -->
+                <div class="question-card" id="card-q13">
+                    <div class="question-title">
+                        <span class="question-num">13.</span>
+                        <label for="q13">Hay un botón rojo delante de ti. ¿Qué haces?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q13" name="q13" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="pulso">Lo pulso</option>
+                            <option value="no_pulso">No lo pulso</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <!-- Q14 -->
+                <div class="question-card" id="card-q14">
+                    <div class="question-title">
+                        <span class="question-num">14.</span>
+                        <label for="q14">¿Qué super poder tienes?</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="q14" name="q14" onchange="updateProgress()">
+                            <option value="" disabled selected>Selecciona una opción...</option>
+                            <option value="inmortalidad">Inmortalidad</option>
+                            <option value="volar">Volar</option>
+                            <option value="ninguno">Ninguno</option>
+                        </select>
+                    </div>
+                    <div class="error-msg">Este campo es obligatorio.</div>
+                </div>
+
+                <button type="button" class="btn-primary" onclick="calculateDestiny()">CALCULAR MI DESTINO</button>
+            </form>
+        </div>
+
+        <!-- LOADER -->
+        <div class="loader-container" id="loader">
+            <div class="spinner"></div>
+            <h3>PROCESANDO REGISTRO VITAL...</h3>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="result-section">
+            <div class="result-card">
+                <div class="result-title">Estimación de Muerte</div>
+                <div class="result-age" id="res-age">--</div>
+
+                <span class="story-emoji" id="res-emoji">💀</span>
+
+                <div class="cause-title">Causa Probable del Deceso</div>
+                <div class="story-box" id="res-story">
+                    <!-- Story lines inserted here -->
+                </div>
+
+                <!-- Tombstone secret button -->
+                <button type="button" class="tombstone-btn" id="tombstone-btn" onclick="changeStoryOnly()" title="Consultar causa alternativa">🪦</button>
+            </div>
+
+            <!-- Breakdown Accordion -->
+            <details class="breakdown-details">
+                <summary>¿Cómo has llegado hasta aquí?</summary>
+                <div class="breakdown-content" id="breakdown-list">
+                    <!-- Dynamic breakdown -->
+                </div>
+            </details>
+
+            <button type="button" class="btn-secondary" onclick="resetQuiz()">VOLVER A EMPEZAR</button>
+        </div>
+    </div>
+
+    <script>
+        // Populate Age dropdown (1 to 100)
+        const q1Select = document.getElementById('q1');
+        for (let i = 1; i <= 100; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = i + (i === 1 ? ' año' : ' años');
+            q1Select.appendChild(opt);
+        }
+
+        // Stories Data
+        const STORIES = {
+            1: {
+                emoji: '🚬',
+                lines: [
+                    'Fumas y acabas desarrollando cáncer de pulmón.',
+                    'Pero, mientras pelas distraídamente una mandarina, te atropella un tranvía.',
+                    'La mandarina sobrevive. Tú no.'
+                ]
+            },
+            2: {
+                emoji: '🥃',
+                lines: [
+                    'El alcohol acaba pasándote factura y te pones muy enferm@.',
+                    'Pero, mientras vas silbando una canción de Malú, se te cae un piano encima.',
+                    'Al menos la canción quedó a medias.'
+                ]
+            },
+            3: {
+                emoji: '☀️',
+                lines: [
+                    'Gracias a tu inmortalidad, consigues vivir durante 3691 años.',
+                    'Pero finalmente la Tierra se pega al Sol y se derrite.',
+                    'Ni siquiera la inmortalidad podía solucionar ese problema. ☀️'
+                ]
+            },
+            4: {
+                emoji: '😰',
+                lines: [
+                    'Llevas una vida de mucho estrés y nunca consigues relajarte.',
+                    'Un día te comes un yogur caducado de la marca de Carmen Machi que te sienta mal.',
+                    'Después de tanto estrés, resulta que el yogur era lo que faltaba.'
+                ]
+            },
+            5: {
+                emoji: '💀',
+                lines: [
+                    'Muerte inmediata.',
+                    'Sin historia. Sin explicación.',
+                    'Fin.'
+                ]
+            },
+            6: {
+                emoji: '🫰',
+                lines: [
+                    'Mueres atragantad@ con una cáscara de pipa justo antes de hacer el chasquido con el guantalete que puede salvar el mundo.',
+                    'Tras tu muerte, desaparecen todos los personajes de Marvel.',
+                    'El mundo se acaba. Todo por una cáscara de pipa.'
+                ]
+            },
+            7: {
+                emoji: '🧵',
+                lines: [
+                    'Duermes más de 8 horas y llevas una vida aparentemente tranquila.',
+                    'Pero un día te pinchas con la aguja de una rueca embrujada.',
+                    'Nadie sabe cómo había llegado una rueca embrujada hasta allí.'
+                ]
+            },
+            8: {
+                emoji: '✈️',
+                lines: [
+                    'Un día vuelas tranquilamente por encima de la ciudad y te chocas con un cable de luz.',
+                    'Rebotas y se te engancha la capa en el motor de un avión.',
+                    'La física, una vez más, gana.'
+                ]
+            },
+            9: {
+                emoji: '🍿',
+                lines: [
+                    'Te empachas de palomitas viendo Netflix, completamente enganchad@ a tu serie favorita.',
+                    'El autoreproducir emite todas las temporadas de la serie, una detrás de otra.',
+                    'Pero para entonces, tú ya estás muert@.'
+                ]
+            },
+            10: {
+                emoji: '🥒',
+                lines: [
+                    'Un nuevo virus que convierte a la gente en pepinillo se expande a una velocidad nunca vista.',
+                    'La transformación provoca una muerte rápida e indolora.',
+                    'Al menos nadie tuvo que decidir qué ponerse para Halloween.'
+                ]
+            },
+            11: {
+                emoji: '🪄',
+                lines: [
+                    'Las malas compañías te llevan a defender a un ser querido en un duelo de varitas a muerte.',
+                    'Luchas hasta el final y mueres como un héroe.',
+                    'Quizá deberías haber elegido mejor tus amistades.'
+                ]
+            },
+            12: {
+                emoji: '😴',
+                lines: [
+                    'Un día te vas a dormir feliz y no vuelves a despertarte.',
+                    'Te vas sin dolor, mientras sueñas con un gobierno que defiende el derecho a la vivienda.',
+                    'No era un mal último sueño.'
+                ]
+            },
+            13: {
+                emoji: '🦬',
+                lines: [
+                    'Te avisan de que un familiar joven está en peligro en el desfiladero y hay una stamped de ñus.',
+                    'Vas a salvarlo y mueres como un héroe.',
+                    'Tu hermano acaba sentado en el trono.'
+                ]
+            },
+            14: {
+                emoji: '⚔️',
+                lines: [
+                    'Mientras peleas con tu hij@ a espadas láser, descubre que durante todo este tiempo, siendo un villano, también eras su padre.',
+                    'Pero ya es tarde: te ha herido de muerte.',
+                    'En tus últimos segundos te redimes y mueres en paz.'
+                ]
+            },
+            15: {
+                emoji: '🦕',
+                lines: [
+                    'Una empresa consigue clonar el ADN de los dinosaurios, pero el experimento sale mal y se escapan.',
+                    'Un diplodocus acaba aplastándote porque se tropieza con tu ego.',
+                    'Ni así conseguiste tener una muerte importante.'
+                ]
+            },
+            16: {
+                emoji: '🚢',
+                lines: [
+                    'Un crucero por el Atlántico Norte choca con un iceberg y se hunde, y tú lo estás viendo en las noticias.',
+                    'Estás tan enganchad@ que no te das cuenta de que tu perro se acerca hasta que ladra de repente.',
+                    'Te asustas y mueres de un infarto.'
+                ]
+            }
+        };
+
+        // State variables
+        let currentCalculatedResult = null;
+        let lastSelectedStoryId = null;
+
+        function updateProgress() {
+            let answered = 0;
+            for (let i = 1; i <= 14; i++) {
+                const val = document.getElementById('q' + i).value;
+                if (val !== "") {
+                    answered++;
+                    document.getElementById('card-q' + i).classList.remove('error');
+                }
+            }
+            document.getElementById('progress-text').textContent = `${answered} / 14 completadas`;
+            document.getElementById('progress-bar').style.width = `${(answered / 14) * 100}%`;
+        }
+
+        function calculateDestiny() {
+            let firstUnanswered = null;
+
+            for (let i = 1; i <= 14; i++) {
+                const card = document.getElementById('card-q' + i);
+                const val = document.getElementById('q' + i).value;
+                if (!val) {
+                    card.classList.add('error');
+                    if (!firstUnanswered) firstUnanswered = card;
+                } else {
+                    card.classList.remove('error');
+                }
+            }
+
+            if (firstUnanswered) {
+                firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // Show loader
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            setTimeout(() => {
+                computeAndShowResult();
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('result-section').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 800);
+        }
+
+        function roundHalfUp(val) {
+            const floor = Math.floor(val);
+            const diff = val - floor;
+            if (diff >= 0.5) {
+                return Math.ceil(val);
+            } else {
+                return Math.floor(val);
+            }
+        }
+
+        function computeAndShowResult() {
+            const ageInit = parseInt(document.getElementById('q1').value, 10);
+            const q2 = document.getElementById('q2').value;
+            const q3 = document.getElementById('q3').value;
+            const q4 = document.getElementById('q4').value;
+            const q5 = document.getElementById('q5').value;
+            const q6 = document.getElementById('q6').value;
+            const q7 = document.getElementById('q7').value;
+            const q8 = document.getElementById('q8').value;
+            const q9 = document.getElementById('q9').value;
+            const q10 = document.getElementById('q10').value;
+            const q11 = document.getElementById('q11').value;
+            const q12 = document.getElementById('q12').value;
+            const q13 = document.getElementById('q13').value;
+            const q14 = document.getElementById('q14').value;
+
+            // Rules Calculation
+            const isImmortal = (q14 === 'inmortalidad');
+            const isImmediateDeath = !isImmortal && (q2 === 'prefiero_no' || q13 === 'pulso');
+
+            let modifiers = [];
+
+            // Q2 Modifiers
+            let modQ2 = 0;
+            let labelQ2 = "";
+            if (q2 === 'hombre') { modQ2 = 3; labelQ2 = "Sexo: Hombre (+3)"; }
+            else if (q2 === 'mujer') { modQ2 = 7; labelQ2 = "Sexo: Mujer (+7)"; }
+            else { labelQ2 = "Sexo: Prefiero no contestar (Muerte inmediata)"; }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 2 (Sexo)", desc: labelQ2, val: modQ2 });
+
+            // Q3 Modifiers
+            let modQ3 = 0;
+            let labelQ3 = "";
+            if (q3 === 'si') {
+                if (ageInit < 31) { modQ3 = 5; labelQ3 = "Fuma (Edad < 31): +5"; }
+                else { modQ3 = 0; labelQ3 = "Fuma (Edad ≥ 31): +0"; }
+            } else {
+                if (ageInit < 50) { modQ3 = 20; labelQ3 = "No fuma (Edad < 50): +20"; }
+                else { modQ3 = 10; labelQ3 = "No fuma (Edad ≥ 50): +10"; }
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 3 (Tabaco)", desc: labelQ3, val: modQ3 });
+
+            // Q4 & Q5 Modifiers
+            let rawQ4 = 0;
+            let descQ4 = "";
+            if (q4 === 'si') {
+                if (ageInit < 40) { rawQ4 = 10; descQ4 = "Ejercicio Sí (Edad < 40): +10"; }
+                else { rawQ4 = 5; descQ4 = "Ejercicio Sí (Edad ≥ 40): +5"; }
+            } else {
+                if (ageInit < 35) { rawQ4 = 5; descQ4 = "Ejercicio No (Edad < 35): +5"; }
+                else { rawQ4 = 1; descQ4 = "Ejercicio No (Edad ≥ 35): +1"; }
+            }
+
+            let modQ4 = rawQ4;
+            let descQ5 = "";
+            if (q5 === 'si') {
+                modQ4 = roundHalfUp(rawQ4 / 2);
+                descQ5 = `Deportes de riesgo: Sí (Divide ejerc. ${rawQ4} entre 2 = ${modQ4})`;
+            } else {
+                descQ5 = "Deportes de riesgo: No (Conserva ejerc. intacto)";
+            }
+            if (!isImmortal && !isImmediateDeath) {
+                modifiers.push({ label: "Pregunta 4 (Ejercicio)", desc: descQ4, val: rawQ4 });
+                if (q5 === 'si') {
+                    modifiers.push({ label: "Pregunta 5 (Deportes de Riesgo)", desc: descQ5, val: modQ4 - rawQ4 });
+                }
+            }
+
+            // Q6 Modifiers
+            let modQ6 = 0;
+            let descQ6 = "";
+            if (q6 === 'varias_semana') {
+                if (ageInit < 35) { modQ6 = 2; descQ6 = "Alcohol varias/semana (Edad < 35): +2"; }
+                else { modQ6 = -1; descQ6 = "Alcohol varias/semana (Edad ≥ 35): -1"; }
+            } else if (q6 === 'una_semana') {
+                if (ageInit < 35) { modQ6 = 3; descQ6 = "Alcohol 1/semana (Edad < 35): +3"; }
+                else { modQ6 = -1; descQ6 = "Alcohol 1/semana (Edad ≥ 35): -1"; }
+            } else if (q6 === 'par_mes') {
+                if (ageInit < 35) { modQ6 = 7; descQ6 = "Alcohol par/mes (Edad < 35): +7"; }
+                else { modQ6 = 5; descQ6 = "Alcohol par/mes (Edad ≥ 35): +5"; }
+            } else {
+                if (ageInit < 40) { modQ6 = 12; descQ6 = "Alcohol menos/nada (Edad < 40): +12"; }
+                else { modQ6 = 8; descQ6 = "Alcohol menos/nada (Edad ≥ 40): +8"; }
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 6 (Alcohol)", desc: descQ6, val: modQ6 });
+
+            // Q7 Modifiers
+            let modQ7 = 0;
+            let descQ7 = "";
+            if (q7 === 'evito_azucares') {
+                if (ageInit < 30) { modQ7 = 15; descQ7 = "Evita azúcares/grasas (Edad < 30): +15"; }
+                else { modQ7 = 13; descQ7 = "Evita azúcares/grasas (Edad ≥ 30): +13"; }
+            } else if (q7 === 'variada') {
+                if (ageInit < 40) { modQ7 = 10; descQ7 = "Dieta variada (Edad < 40): +10"; }
+                else { modQ7 = 5; descQ7 = "Dieta variada (Edad ≥ 40): +5"; }
+            } else {
+                if (ageInit < 30) { modQ7 = 0; descQ7 = "Como lo que quiero (Edad < 30): +0"; }
+                else if (ageInit <= 50) { modQ7 = 3; descQ7 = "Como lo que quiero (30 ≤ Edad ≤ 50): +3"; }
+                else { modQ7 = 1; descQ7 = "Como lo que quiero (Edad > 50): +1"; }
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 7 (Alimentación)", desc: descQ7, val: modQ7 });
+
+            // Q8 Modifiers
+            let modQ8 = 0;
+            let descQ8 = "";
+            if (q8 === 'alto') {
+                modQ8 = 1; descQ8 = "Estrés alto: +1";
+            } else if (q8 === 'normal') {
+                if (ageInit < 30) { modQ8 = 10; descQ8 = "Estrés normal (Edad < 30): +10"; }
+                else { modQ8 = 5; descQ8 = "Estrés normal (Edad ≥ 30): +5"; }
+            } else {
+                if (ageInit < 40) { modQ8 = 10; descQ8 = "Sin estrés (Edad < 40): +10"; }
+                else if (ageInit <= 50) { modQ8 = 5; descQ8 = "Sin estrés (40 ≤ Edad ≤ 50): +5"; }
+                else { modQ8 = 3; descQ8 = "Sin estrés (Edad > 50): +3"; }
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 8 (Estrés)", desc: descQ8, val: modQ8 });
+
+            // Q9 Modifiers
+            let modQ9 = 0;
+            let descQ9 = "";
+            if (q9 === 'no_gracias') { modQ9 = 5; descQ9 = "Drogas: No (+5)"; }
+            else if (q9 === 'si_favor') { modQ9 = -5; descQ9 = "Drogas: Sí (-5)"; }
+            else { modQ9 = -3; descQ9 = "Drogas: Prefiero no contestar (-3)"; }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 9 (Drogas)", desc: descQ9, val: modQ9 });
+
+            // Q10 Modifiers
+            let modQ10 = 0;
+            let descQ10 = "";
+            if (q10 === 'si') { modQ10 = 3; descQ10 = "Sueño: 8 horas (+3)"; }
+            else if (q10 === 'menos') { modQ10 = 1; descQ10 = "Sueño: Menos (+1)"; }
+            else { modQ10 = 2; descQ10 = "Sueño: Más (+2)"; }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 10 (Sueño)", desc: descQ10, val: modQ10 });
+
+            // Q11 Modifiers
+            let modQ11 = 0;
+            let descQ11 = "";
+            if (q11 === 'si') {
+                if (ageInit < 40) { modQ11 = 5; descQ11 = "Torpe: Sí (Edad < 40): +5"; }
+                else { modQ11 = 3; descQ11 = "Torpe: Sí (Edad ≥ 40): +3"; }
+            } else {
+                modQ11 = 6; descQ11 = "Torpe: No (+6)";
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 11 (Torpeza)", desc: descQ11, val: modQ11 });
+
+            // Q12 Modifiers
+            let modQ12 = 0;
+            let descQ12 = "";
+            if (q12 === 'ley') {
+                if (ageInit < 30) { modQ12 = 5; descQ12 = "Caducidad ley (Edad < 30): +5"; }
+                else { modQ12 = 3; descQ12 = "Caducidad ley (Edad ≥ 30): +3"; }
+            } else {
+                modQ12 = 1; descQ12 = "Caducidad orientativa: +1";
+            }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 12 (Caducidad)", desc: descQ12, val: modQ12 });
+
+            // Q13 Modifiers
+            let modQ13 = 0;
+            let descQ13 = "";
+            if (q13 === 'pulso') { descQ13 = "Botón rojo: Pulsado (Muerte inmediata)"; }
+            else { modQ13 = 1; descQ13 = "Botón rojo: No pulsado (+1)"; }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 13 (Botón rojo)", desc: descQ13, val: modQ13 });
+
+            // Q14 Modifiers
+            let modQ14 = 0;
+            let descQ14 = "";
+            if (q14 === 'inmortalidad') { descQ14 = "Superpoder: Inmortalidad (Fija resultado en 3691 años)"; }
+            else if (q14 === 'volar') { modQ14 = -5; descQ14 = "Superpoder: Volar (-5)"; }
+            else { modQ14 = 1; descQ14 = "Superpoder: Ninguno (+1)"; }
+            if (!isImmortal && !isImmediateDeath) modifiers.push({ label: "Pregunta 14 (Superpoder)", desc: descQ14, val: modQ14 });
+
+            // Calculate final numerical age
+            let totalModSum = 0;
+            if (q5 === 'si') {
+                totalModSum = modQ2 + modQ3 + modQ4 + modQ6 + modQ7 + modQ8 + modQ9 + modQ10 + modQ11 + modQ12 + modQ13 + modQ14;
+            } else {
+                totalModSum = modQ2 + modQ3 + rawQ4 + modQ6 + modQ7 + modQ8 + modQ9 + modQ10 + modQ11 + modQ12 + modQ13 + modQ14;
+            }
+
+            let finalAge = ageInit + totalModSum;
+
+            if (finalAge < ageInit) finalAge = ageInit;
+            if (finalAge < 0) finalAge = 0;
+
+            currentCalculatedResult = {
+                ageInit,
+                isImmortal,
+                isImmediateDeath,
+                finalAge,
+                q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14,
+                modifiers
+            };
+
+            // Display Age
+            const resAgeElem = document.getElementById('res-age');
+            if (isImmortal) {
+                resAgeElem.textContent = "3691 AÑOS";
+            } else if (isImmediateDeath) {
+                resAgeElem.textContent = "MUERTE INMEDIATA";
+            } else {
+                resAgeElem.textContent = `${finalAge} AÑOS`;
+            }
+
+            // Select Story
+            const storyId = selectStory(currentCalculatedResult);
+            displayStory(storyId);
+
+            // Populate Breakdown
+            renderBreakdown(currentCalculatedResult);
+
+            // Launch Confetti
+            triggerConfetti(isImmortal);
+        }
+
+        function selectStory(res, avoidId = null) {
+            if (res.isImmortal) return 3;
+            if (res.isImmediateDeath) return 5;
+
+            // Historias neutras / aleatorias (siempre disponibles)
+            let pool = [6, 9, 10, 11, 13, 14, 15, 16];
+
+            // Historias condicionales: se añaden al mismo grupo con la misma probabilidad
+            if (res.q3 === 'si') pool.push(1);
+            if (['varias_semana', 'una_semana', 'par_mes'].includes(res.q6)) pool.push(2);
+            if (res.q8 === 'alto') pool.push(4);
+            if (res.q10 === 'mas') pool.push(7);
+            if (res.q14 === 'volar') pool.push(8);
+            if (res.finalAge > 60) pool.push(12);
+
+            let candidates = pool;
+
+            // Si pulsamos la lápida (avoidId presente), evitamos repetir la misma historia
+            if (avoidId) {
+                let filtered = candidates.filter(id => id !== avoidId);
+                if (filtered.length > 0) {
+                    candidates = filtered;
+                }
+            }
+
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+            return chosen;
+        }
+
+        function displayStory(storyId) {
+            lastSelectedStoryId = storyId;
+            const storyData = STORIES[storyId];
+
+            document.getElementById('res-emoji').textContent = storyData.emoji;
+
+            const storyBox = document.getElementById('res-story');
+            storyBox.innerHTML = '';
+            storyData.lines.forEach(line => {
+                const p = document.createElement('p');
+                p.textContent = line;
+                storyBox.appendChild(p);
+            });
+        }
+
+        function changeStoryOnly() {
+            if (!currentCalculatedResult) return;
+            const newStoryId = selectStory(currentCalculatedResult, lastSelectedStoryId);
+            displayStory(newStoryId);
+        }
+
+        function renderBreakdown(res) {
+            const listContainer = document.getElementById('breakdown-list');
+            listContainer.innerHTML = '';
+
+            if (res.isImmortal) {
+                listContainer.innerHTML = `
+                    <div style="padding: 10px 0; color: #a0a0a0;">
+                        Has seleccionado el estado de <strong>Inmortalidad</strong> en la pregunta 14.<br><br>
+                        Esta condición prevalece sobre cualquier otro parámetro vital, fijando el registro exactamente en <strong>3691 años</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            if (res.isImmediateDeath) {
+                let cause = "";
+                if (res.q2 === 'prefiero_no' && res.q13 === 'pulso') {
+                    cause = "Omisión de sexo (Pregunta 2) y pulsación del botón rojo (Pregunta 13).";
+                } else if (res.q2 === 'prefiero_no') {
+                    cause = "Omisión de declaración de sexo (Pregunta 2).";
+                } else {
+                    cause = "Pulsación del botón rojo fatal (Pregunta 13).";
+                }
+
+                listContainer.innerHTML = `
+                    <div style="padding: 10px 0; color: #a0a0a0;">
+                        Se ha ejecutado un protocolo de <strong>Muerte Inmediata</strong> derivado de:<br>
+                        <strong style="color: #ef4444;">${cause}</strong><br><br>
+                        Esta condición invalida la estimación matemática estándar.
+                    </div>
+                `;
+                return;
+            }
+
+            // Normal breakdown
+            let html = `
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Edad inicial declarada (Pregunta 1)</span>
+                    <span class="breakdown-val">${res.ageInit} años</span>
+                </div>
+            `;
+
+            res.modifiers.forEach(m => {
+                const sign = m.val > 0 ? `+${m.val}` : `${m.val}`;
+                const cls = m.val > 0 ? 'plus' : (m.val < 0 ? 'minus' : '');
+                html += `
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">${m.label}: ${m.desc}</span>
+                        <span class="breakdown-val ${cls}">${sign}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="breakdown-total">
+                    <span>Resultado Final Estimado:</span>
+                    <span>${res.finalAge} años</span>
+                </div>
+            `;
+
+            listContainer.innerHTML = html;
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-form').reset();
+            currentCalculatedResult = null;
+            lastSelectedStoryId = null;
+
+            for (let i = 1; i <= 14; i++) {
+                document.getElementById('card-q' + i).classList.remove('error');
+            }
+
+            updateProgress();
+
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+
+            const details = document.querySelector('.breakdown-details');
+            if (details) details.removeAttribute('open');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Custom Confetti Particle System
+        function triggerConfetti(isImmortal = false) {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particleCount = isImmortal ? 200 : 80;
+            const particles = [];
+            const colors = ['#c5a059', '#e5be75', '#ffffff', '#555555', '#888888'];
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 - 50,
+                    vx: (Math.random() - 0.5) * (isImmortal ? 16 : 10),
+                    vy: (Math.random() - 0.7) * (isImmortal ? 18 : 12),
+                    size: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rSpeed: (Math.random() - 0.5) * 8,
+                    gravity: 0.22,
+                    opacity: 1
+                });
+            }
+
+            let animationFrame;
+            const startTime = Date.now();
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.rotation += p.rSpeed;
+                    p.opacity -= 0.009;
+
+                    if (p.opacity > 0) {
+                        alive = true;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate((p.rotation * Math.PI) / 180);
+                        ctx.globalAlpha = Math.max(0, p.opacity);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        ctx.restore();
+                    }
+                });
+
+                if (alive && (Date.now() - startTime < 3500)) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            render();
+        }
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
